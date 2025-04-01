@@ -1,48 +1,105 @@
 package renderer
 
 import (
+	"context"
 	"fmt"
+	"mime/multipart"
 	"net/http"
+	"os"
 
+	"github.com/imagekit-developer/imagekit-go"
+	"github.com/imagekit-developer/imagekit-go/api/uploader"
 	"github.com/jmoiron/sqlx"
-    _ "github.com/godror/godror"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-//(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g32efab5c690c1e_lczydxip7wj7saab_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
-//user="admin" password="Delcid_Bueso_6004" connectionString="lczydxip7wj7saab_high"
-//ADMIN:Delcid_Bueso_6004@adb.mx-queretaro-1.oraclecloud.com:1522/lczydxip7wj7saab_high
+var images *imagekit.ImageKit
+
+func simpleHash(str string) int {
+	result := 1
+	runes := []rune(str)
+	for i := range len(str) {
+		result = result + (int(runes[i]) * len(str))
+	}
+	return result
+}
+
+func hash(str string) int {
+	key := simpleHash(os.Getenv("SECRET_PASSWORD"))
+	runes := []rune(str)
+	result := 1
+	for i := range len(str) {
+		result = result + (int(runes[i]))*key
+	}
+	return result
+}
+
+func InitImageKet() error {
+	ik, err := imagekit.New()
+	if err != nil {
+		return fmt.Errorf("There was an error initializing the image kit!\nerr.Error(): %v\n", err.Error())
+	}
+	images = ik
+	return nil
+}
+
+func InitDotEnv() error {
+	return godotenv.Load()
+}
+
 func getConnetion() (*sqlx.DB, error) {
-    con, err := sqlx.Open("godror", `admin:Delcid_Bueso_6004@adb.mx-queretaro-1.oraclecloud.com:1522/LCZYDXIP7WJ7SAAB_high`)
-    if err != nil {
-        return nil, fmt.Errorf("Crash while stablishing conection!\nerr.Error(): %v\n", err.Error())
-    }
-    return con, nil
+	con, err := sqlx.Open("postgres", os.Getenv("CONNECTION_STRING"))
+	if err != nil {
+		return nil, fmt.Errorf("Crash while stablishing conection!\nerr.Error(): %v\n", err.Error())
+	}
+	return con, nil
+}
+
+func uploadImage(file multipart.File, filename string) (Url string) {
+	resp, err := images.Uploader.Upload(context.Background(), file, uploader.UploadParam{
+		FileName: filename,
+	})
+	if err != nil {
+        return "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769" 
+	}
+    return resp.Data.Url
 }
 
 func writeStatusMessage(w http.ResponseWriter, status int, message string) {
-    w.Header().Set("HX-Status", fmt.Sprint(status))
-    w.Header().Set("HX-Message", message)
-    w.WriteHeader(status)
+	w.Header().Set("HX-Status", fmt.Sprint(status))
+	w.Header().Set("HX-Message", message)
+	w.WriteHeader(status)
 }
 
 func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Beginning user registration...")
+	fmt.Println("Beginning user registration...")
 
-    con, err := getConnetion()
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusNotAcceptable); 
-        fmt.Println(err.Error())
-        return
-    }
-    defer con.Close()
+	con, err := getConnetion()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotAcceptable)
+		fmt.Println(err.Error())
+		return
+	}
+	defer con.Close()
 
-    err = con.Ping()
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusNotAcceptable); 
-        fmt.Println(err.Error())
-        return
-    }
-    fmt.Println("User registered succesfully!")
-    writeStatusMessage(w, http.StatusOK, "User succesfully registered!")
+	r.ParseMultipartForm(10 << 20)
+	file, header, err := r.FormFile("pfp")
+	if err != nil {
+		fmt.Printf("Crash while fetching the pfp!\nerr.Error(): %v\n", err.Error())
+        writeStatusMessage(w, http.StatusBadRequest, fmt.Sprintf("There was an error loading the image file! err.Error(): %v", err.Error()))
+        w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	user := users{
+		Username: r.PostFormValue("username"),
+		Email:    r.PostFormValue("email"),
+		Password: hash(r.PostFormValue("password")),
+		PfpUrl:   uploadImage(file, header.Filename),
+	}
+
+	fmt.Printf("\nUser: %s, registered succesfully!\n", user.Username)
+	writeStatusMessage(w, http.StatusOK, "User succesfully registered!")
 }
-

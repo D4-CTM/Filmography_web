@@ -1,12 +1,13 @@
 {{ define "app-content" }}
     <div class="bg-container center-all"> 
-        <form class="fl-col center-all">
+        <form class="fl-col center-all" 
+            enctype="multipart/form-data"
+            hx-encoding="multipart/form-data">
             <div class="form-content fl-col center-all">
                 <div class="input-div fl-col center-all">
-                    <p>Profile picture:</p>
-                    <button type="submit" class="pfp-container">
-                        <input type="image" class="pfp" src="/backend/imgs/default_pfp.png" name="pfp">
-                </button>
+                    <button type="button" class="pfp-container" onclick="document.getElementById('pfp-hidden').click()">
+                        <img src="https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769" referrerpolicy="no-referrer" id="pfp" class="pfp clickable-cursor">
+                    </button>
                 </div>
                 <div class="input-div fl-col center-all">
                     <p>Username*:</p>
@@ -26,12 +27,14 @@
                 </div>
             </div>
             <div class="form-buttons fl-row center-fill">
-                <input type="submit" class="submit-button cancel-btn" value="Cancel">
-                <input type="submit" class="submit-button accept-btn" value="Register"
+                <input type="submit" class="submit-button cancel-btn clickable-cursor" value="Cancel">
+                <input type="submit" value="Register"
+                    class="submit-button accept-btn clickable-cursor"
                     hx-post="/register-user/"
-                    hx-on::before-request="validateForm(event)"
+                    hx-on::before-request="validateRegister(event)"
                     hx-on::after-request="handleResponse(event)">
             </div>
+            <input type="file" name="pfp" id="pfp-hidden" class="hidden-component" accept="image/*" onchange="changePfp(this.files[0])">
         </form>
     </div>
 {{ end }}

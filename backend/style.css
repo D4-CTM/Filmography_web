@@ -124,11 +124,22 @@ body {
 
 .pfp {
     height: 175px;
+    width: 175px;
+    border-radius: 50%;
+}
+
+.clickable-cursor {
+    cursor: pointer;
+}
+
+.hidden-component {
+    display: none;
 }
 
 .pfp-container {
     border: 1px solid transparent;
     background-color: inherit;
+    border-radius: 50%;
     margin: 0;
     padding: 0;
 }

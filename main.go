@@ -8,6 +8,16 @@ import (
 )
 
 func main() {
+    err := renderer.InitDotEnv()
+    if err != nil {
+        log.Fatalln(err.Error())
+    }
+
+    err = renderer.InitImageKet()
+    if err != nil {
+        log.Fatalln(err.Error())
+    }
+
     log.Println("Starting server...")
     static := http.FileServer(http.Dir("backend"))
 
@@ -18,7 +28,7 @@ func main() {
 
     // actual sites on the page
     mux.HandleFunc("/register", renderer.HandleRegister)
-  
+
     log.Println("Server started!")
     log.Fatal(http.ListenAndServe(":5412", mux))
 }
