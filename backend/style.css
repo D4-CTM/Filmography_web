@@ -1,166 +1,191 @@
-
 :root {
-    --outer-bg: #E7CFBC;
-    --inner-bg: #FFF4EC;
-    
-    --cancel-btn-bg: #EC3832;
-    --cancel-btn-bor-bg: #512828;
-    --cancel-btn-fg: #ffffff;
-    --cancel-btn-bg-pressed: #ba211c;
+  --outer-bg: #e7cfbc;
+  --inner-bg: #fff4ec;
 
-    --accept-btn-bg: #49b649;
-    --accept-btn-bor-bg: #285131;
-    --accept-btn-fg: #ffffff;
-    --accept-btn-bg-pressed: #1c801c;
+  --cancel-btn-bg: #ec3832;
+  --cancel-btn-bor-bg: #512828;
+  --cancel-btn-fg: #ffffff;
+  --cancel-btn-bg-pressed: #ba211c;
+
+  --accept-btn-bg: #49b649;
+  --accept-btn-bor-bg: #285131;
+  --accept-btn-fg: #ffffff;
+  --accept-btn-bg-pressed: #1c801c;
 }
 
 body {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .center-all {
-    align-items: center;
-    justify-content: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .center-fill {
-    align-items: center;
-    justify-content: space-around;
+  align-items: center;
+  justify-content: space-around;
 }
 
 .bg-container {
-    height: 100vh;
-    display: flex;
-    background-color: var(--outer-bg);
+  height: 100vh;
+  display: flex;
+  background-color: var(--outer-bg);
 }
 
 .bg-container form {
-    height: 85%;
-    width: 85%;
-    background-color: var(--inner-bg);
+  height: 85%;
+  width: 85%;
+  background-color: var(--inner-bg);
 }
 
 .bg-container form .form-content {
-    width: 100%;
-    height: 85%; 
+  width: 100%;
+  height: 85%;
+}
+
+.scrollable {
+  overflow: scroll;
 }
 
 .bg-container form .form-buttons {
-    width: 100%;
-    height: 15%; 
+  width: 100%;
+  height: 15%;
+}
+
+.fl {
+    flex: 1 0 auto;
 }
 
 .fl-col {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .fl-row {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+}
+
+.fl-wrap {
+  flex-wrap: wrap;
 }
 
 .form-content {
-    overflow: scroll;
+  overflow: scroll;
 }
 
-.form-content .input-div{
-    width: 85%;
+.form-content .input-div {
+  width: 85%;
 }
 
 .input-div {
-    font-size: 28px;
+  font-size: 28px;
 }
 
-.input-div p{
-    margin: 10px;
+.input-div p {
+  margin: 10px;
 }
 
+.input-div textarea,
 .input-div input {
-    font-size: 24px;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border: none;
-    outline: none;
+  font-size: 24px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border: none;
+  outline: none;
 }
 
+.input-div textarea:focus,
 .input-div input:focus {
-    border: 3px solid #000;
-    transition: border 0.2s ease;
+  border: 3px solid #000;
+  transition: border 0.2s ease;
 }
 
 .rvl-pass {
-    background-color: white;
-    transition: border 0.2s ease;
-    border: 3px solid transparent;
+  background-color: white;
+  transition: border 0.2s ease;
+  border: 3px solid transparent;
 }
 
 .rvl-pass:focus-within {
-    border-color: #000;
+  border-color: #000;
 }
 
 .rvl-pass .password-fld,
 .rvl-pass .rvl-button {
-    border: none;
-    background-color: white;
+  border: none;
+  background-color: white;
 }
 
 .rvl-pass .rvl-button {
-    font-size: 24px;
-    margin-left: 4px;
-    margin-right: 4px;
+  font-size: 24px;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .submit-button {
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    font-size: 42px;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  font-size: 42px;
 }
 
 .pfp {
-    height: 175px;
-    width: 175px;
-    border-radius: 50%;
+  height: 175px;
+  width: 175px;
+  border-radius: 50%;
+}
+
+.poster {
+    height: 525px;
+    width: 350px;
 }
 
 .clickable-cursor {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .hidden-component {
-    display: none;
+  display: none;
+}
+
+.poster-container {
+  border: 2px solid black;
+  background-color: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 .pfp-container {
-    border: 1px solid transparent;
-    background-color: inherit;
-    border-radius: 50%;
-    margin: 0;
-    padding: 0;
+  border: 1px solid transparent;
+  background-color: inherit;
+  border-radius: 50%;
+  margin: 0;
+  padding: 0;
 }
 
 .cancel-btn {
-    background-color: var(--cancel-btn-bg);
-    border: 4px solid var(--cancel-btn-bor-bg);
-    color: var(--cancel-btn-fg);
+  background-color: var(--cancel-btn-bg);
+  border: 4px solid var(--cancel-btn-bor-bg);
+  color: var(--cancel-btn-fg);
 }
 
 .cancel-btn:focus {
-    background-color: var(--cancel-btn-bg-pressed);
+  background-color: var(--cancel-btn-bg-pressed);
 }
 
 .accept-btn {
-    background-color: var(--accept-btn-bg);
-    border: 4px solid var(--accept-btn-bor-bg);
-    color: var(--accept-btn-fg);
+  background-color: var(--accept-btn-bg);
+  border: 4px solid var(--accept-btn-bor-bg);
+  color: var(--accept-btn-fg);
 }
 
 .accept-btn:focus {
-    background-color: var(--accept-btn-bg-pressed);
+  background-color: var(--accept-btn-bg-pressed);
 }
 

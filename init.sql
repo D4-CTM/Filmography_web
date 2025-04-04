@@ -11,6 +11,7 @@ CREATE INDEX idx_email ON users(email);
 CREATE INDEX idx_login ON users(username, password);
 
 create procedure sp_insert_user(
+  OUT v_id INT,
   v_username VARCHAR(75),
   v_email VARCHAR(100),
   v_pfp_url VARCHAR(255),
@@ -20,7 +21,8 @@ language plpgsql
 as $$
 begin
   INSERT INTO users(username, email, pfp_url, password)
-  values(v_username, v_email, v_pfp_url, v_password);
+  VALUES(v_username, v_email, v_pfp_url, v_password)
+  RETURNING id INTO v_id;
 end;
 $$
 
