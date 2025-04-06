@@ -1,3 +1,11 @@
+
+@font-face {
+    font-family: 'Lobster';
+    src: url('/backend/fonts/Lobster.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
   --outer-bg: #e7cfbc;
   --inner-bg: #fff4ec;
@@ -11,11 +19,22 @@
   --accept-btn-bor-bg: #285131;
   --accept-btn-fg: #ffffff;
   --accept-btn-bg-pressed: #1c801c;
+
+  --selected-rating-btn-bor-bg: red;
+  --selected-rating-btn-bg: #FFEE70;
+  --free-rating-btn-bor-bg: #999999;
+  --free-rating-btn-bg: #EBEBEB;
 }
 
 body {
   padding: 0;
   margin: 0;
+  font-family: 'open sans';
+}
+
+.ft-lobster {
+    font-family: 'Lobster';
+    font-size: 38px;
 }
 
 .center-all {
@@ -40,7 +59,7 @@ body {
   background-color: var(--inner-bg);
 }
 
-.bg-container form .form-content {
+.form-content {
   width: 100%;
   height: 85%;
 }
@@ -69,11 +88,15 @@ body {
 }
 
 .fl-wrap {
-  flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.lt-pad {
+    padding: 15px;
 }
 
 .form-content {
-  overflow: scroll;
+  overflow: auto;
 }
 
 .form-content .input-div {
@@ -136,14 +159,19 @@ body {
 }
 
 .pfp {
-  height: 175px;
-  width: 175px;
+  max-height: 175px;
+  max-width: 175px;
+  height: auto;
+  width: auto;
   border-radius: 50%;
+  object-fit: contain;
 }
 
 .poster {
     height: 525px;
     width: 350px;
+    padding: 0px;
+    margin: 0px;
 }
 
 .clickable-cursor {
@@ -169,6 +197,10 @@ body {
   padding: 0;
 }
 
+.not-resizable {
+    resize: none;
+}
+
 .cancel-btn {
   background-color: var(--cancel-btn-bg);
   border: 4px solid var(--cancel-btn-bor-bg);
@@ -187,5 +219,52 @@ body {
 
 .accept-btn:focus {
   background-color: var(--accept-btn-bg-pressed);
+}
+
+.rating-btn {
+    height: 60px;
+    width: 60px;
+    font-size: 32px;
+}
+
+.free-rating-btn {
+    border: 2px solid var(--free-rating-btn-bor-bg);
+    background-color: var(--free-rating-btn-bg);
+}
+
+.free-rating-btn:hover {
+    background-color: var(--free-rating-btn-bor-bg);
+    color: var(--free-rating-btn-bg);
+    transition: border 0.2s ease;
+    transition: color 0.2s ease;
+    transition: background 0.2s ease;
+}
+
+.selected-rating-btn {
+    border: 2px solid var(--selected-rating-btn-bor-bg);
+    background-color: var(--selected-rating-btn-bg); 
+    color: var(--selected-rating-btn-bor-bg); 
+}
+
+.selected-rating-btn:hover {
+    background-color: var(--selected-rating-btn-bor-bg);
+    color: var(--selected-rating-btn-bg); 
+    transition: border 0.2s ease;
+    transition: color 0.2s ease;
+    transition: background 0.2s ease;
+}
+
+.pad-x-10px {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.selector {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 22px;
+    margin-bottom: 20px;
 }
 

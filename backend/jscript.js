@@ -77,3 +77,53 @@ function revealPass(element) {
 
 }
 
+
+function showMovieOptions() {
+    const poster = document.getElementById("poster-selector") ;
+    const seriesName = document.getElementById("series-name");
+    const contentName = document.getElementById("content-name");
+    const imgContainer = document.getElementById("image-container");
+    const headerText = document.getElementsByClassName("ft-lobster");
+
+    headerText[0].innerText = "Register movie";
+    imgContainer.src = "/backend/imgs/movies.svg"
+    contentName.innerText = "Movie name*:";
+    seriesName.style.display = "none";
+    poster.style.display = "none";
+}
+
+function showSeriesOptions() {
+    const poster = document.getElementById("poster-selector");
+    const seriesName = document.getElementById("series-name");
+    const contentName = document.getElementById("content-name");
+    const imgContainer = document.getElementById("image-container");
+    const headerText = document.getElementsByClassName("ft-lobster");
+
+    headerText[0].innerText = "Register episode";
+    imgContainer.src = "/backend/imgs/series.svg"
+    contentName.innerText = "Episode name*:";
+    seriesName.style.display = "flex";
+    poster.style.display = "flex";
+}
+
+function changeStars(stars) {
+    const ratingBtns = document.getElementsByName("rating-btn"); 
+    const rating = document.getElementsByName("rating")[0];
+    
+    if (rating.value == stars) {
+        stars = 0;
+    }
+
+    for (let i = 0; i < ratingBtns.length; i++) {
+        if (i < stars) {
+            ratingBtns[i].classList.remove("free-rating-btn");
+            ratingBtns[i].classList.add("selected-rating-btn");
+        } else {
+            ratingBtns[i].classList.add("free-rating-btn");
+            ratingBtns[i].classList.remove("selected-rating-btn");
+        }
+    }
+
+    rating.value = stars;
+}
+

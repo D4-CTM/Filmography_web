@@ -1,12 +1,13 @@
 {{ define "app-content" }}
-    <div class="bg-container center-all"> 
+    <div class="bg-container fl-col center-all"> 
+        <h1 class="ft-lobster">Register user</h1>
         <form class="fl-col center-all" 
             enctype="multipart/form-data"
             hx-encoding="multipart/form-data">
-            <div class="form-content fl-col center-all scrollable">
-                <div class="input-div fl-col center-all">
+            <div class="form-content fl-col center-all">
+                <div class="input-div fl-col fl center-all scrollable">
                     <button type="button" class="pfp-container" onclick="document.getElementById('image-hidden').click()">
-                        <img src="https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769" referrerpolicy="no-referrer" id="image-container" class="pfp clickable-cursor">
+                        <img src="/backend/imgs/default_pfp.png" referrerpolicy="no-referrer" id="image-container" class="pfp clickable-cursor">
                     </button>
                 </div>
                 <div class="input-div fl-col center-all">
@@ -35,6 +36,7 @@
                     hx-on::after-request="handleResponse(event)">
             </div>
             <input type="file" name="pfp" id="image-hidden" class="hidden-component" value="/backend/imgs/default_pfp.png" accept="image/*" onchange="changeImage(this.files[0])">
+            <p>Already have an account? <a href="/login">register here</a></p>
         </form>
     </div>
 {{ end }}

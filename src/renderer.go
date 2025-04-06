@@ -30,10 +30,18 @@ func toHTML(fileName string) string {
 	return fmt.Sprintf("./frontend/%s.html", fileName)
 }
 
+func HandleViewContent(w http.ResponseWriter, r *http.Request) {
+    renderFullTemplate(w, nil, toHTML("ContentView"))
+}
+
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
+    renderFullTemplate(w, nil, toHTML("Login"))
+}
+
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	renderFullTemplate(w, nil, toHTML("Register"))
 }
 
 func HandleRegisterContent(w http.ResponseWriter, r *http.Request) {
-	renderFullTemplate(w, nil, toHTML("Content"))
+	renderFullTemplate(w, nil, toHTML("ContentRegister"))
 }
