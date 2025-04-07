@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -16,10 +15,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"golang.org/x/tools/go/analysis/passes/unmarshal"
 )
 
-const defaultPfpName string = "default_pfp.png"
+const (
+	DEFAULT_MOVIE_POSTER  string = "https://ik.imagekit.io/FilmPost/movies.svg?updatedAt=1743831041071"
+	DEFAULT_SERIES_POSTER string = "https://ik.imagekit.io/FilmPost/series.svg?updatedAt=1743831042090"
+	DEFAULT_USER_PFP      string = "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769"
+)
 
 var images *imagekit.ImageKit
 
@@ -68,6 +70,7 @@ func uploadImage(file multipart.File, filename string) *uploader.UploadResult {
 		FileName: filename,
 	})
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil
 	}
 	return &resp.Data
@@ -94,7 +97,7 @@ func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
 		Username: r.PostFormValue("username"),
 		Email:    r.PostFormValue("email"),
 		Password: hash(r.PostFormValue("password")),
-		PfpUrl:   sql.NullString{String: "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769", Valid: true},
+		PfpUrl:   sql.NullString{String: DEFAULT_USER_PFP, Valid: true},
 	}
 
 	err = user.Insert(con)
@@ -113,7 +116,7 @@ func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	imgUrl := "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769"
+    imgUrl := DEFAULT_USER_PFP
 
 	imgResult := uploadImage(file, header.Filename)
 	if imgResult != nil {
@@ -131,6 +134,7 @@ func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("\nUser: %s, registered succesfully!\n", user.Username)
+	w.Header().Add("HX-Location", "/login")
 	writeStatusMessage(w, http.StatusOK, "User succesfully registered!")
 }
 
@@ -146,33 +150,34 @@ func EventLogin(w http.ResponseWriter, r *http.Request) {
 
 	user := Users{
 		Username: r.PostFormValue("username"),
-        Password: hash(r.PostFormValue("password")),
+		Password: hash(r.PostFormValue("password")),
 	}
-    err = user.Fetch(con)
+	err = user.Fetch(con)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotAcceptable)
 		fmt.Println(err.Error())
 		return
 	}
-   
-    json, err := json.Marshal(user)    
-    if err != nil {
+
+	userJson, err := user.ToJson()
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotAcceptable)
 		fmt.Println(err.Error())
-        return
-    }
+		return
+	}
 
-    cookie := http.Cookie{
-        Name: "user-cookie",
-        Value: base64.RawStdEncoding.EncodeToString(json),
-        Secure: true,
-        HttpOnly: true,
-    }
-    http.SetCookie(w, &cookie)
+	cookie := http.Cookie{
+		Name:     "user-cookie",
+		Value:    base64.RawStdEncoding.EncodeToString(userJson),
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
 
 	fmt.Println("User logged in!")
-    w.Header().Set("HX-Location", "/content-view")
-	writeStatusMessage(w, http.StatusAccepted, "User logged in!")
+	w.Header().Set("HX-Location", "/content-view")
+	writeStatusMessage(w, http.StatusOK, "User logged in succesfully!")
 }
 
 func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
@@ -181,19 +186,21 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 		return err
 	}
 	defer con.Close()
-	movie.PosterUrl = sql.NullString{String: "https://ik.imagekit.io/FilmPost/movies.svg?updatedAt=1743831041071", Valid: true}
 
 	err = movie.Insert(con)
+	if err != nil {
+		return err
+	}
 
 	r.ParseMultipartForm(10 << 20)
-	file, header, err := r.FormFile("pfp")
+	file, header, err := r.FormFile("poster")
 	if err != nil {
 		fmt.Printf("\nmovie: %s, registered without poster!\nerr.Error(): %s", movie.Name, err.Error())
-		writeStatusMessage(w, http.StatusOK, "Movie registered without poster!")
+		writeStatusMessage(w, http.StatusCreated, "Movie registered without poster!")
 		return nil
 	}
 	defer file.Close()
-	imgUrl := "https://ik.imagekit.io/FilmPost/movies.svg?updatedAt=1743831041071"
+	imgUrl := DEFAULT_MOVIE_POSTER
 
 	imgResult := uploadImage(file, header.Filename)
 	if imgResult != nil {
@@ -203,8 +210,12 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 	movie.PosterUrl = sql.NullString{String: imgUrl, Valid: len(imgUrl) > 0}
 	err = movie.Update(con)
 	if err != nil {
-		fmt.Printf("\nCrash while inserting the movie poster!\nerr.Error(): %v\n", err.Error())
+		errMsg := fmt.Sprintf("\nCrash while inserting the movie poster!\nerr.Error(): %v\n", err.Error())
+		fmt.Println(errMsg)
+		return fmt.Errorf(errMsg)
 	}
+
+	writeStatusMessage(w, http.StatusCreated, "Movie registered succesfully!")
 	return nil
 }
 
@@ -220,21 +231,27 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 		writeStatusMessage(w, http.StatusBadRequest, errMsg)
 		return
 	}
-    cookie, err := r.Cookie("user-cookie")
-    if err != nil {
-        fmt.Println(err.Error())
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+	cookie, err := checkCookie("user-cookie", r)
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-    var user Users
-    json, err := base64.RawStdEncoding.DecodeString(cookie.Value)
-    if err != nil {
-        fmt.Println(err.Error())
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-    
+	var user Users
+	userJson, err := base64.RawStdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = user.FromJson(userJson)
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	insertionElement := r.PostFormValue("content")
 	if insertionElement == "M" {
@@ -243,10 +260,15 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 			Name:        contentName,
 			Description: sql.NullString{String: description, Valid: len(description) > 0},
 			Stars:       int16(rating),
-            AddedBy:    ,
+			AddedBy:     user.Id,
+			PosterUrl:   sql.NullString{String: DEFAULT_MOVIE_POSTER, Valid: true},
 		}
 
-		insertMovie(w, r, movie)
+		err = insertMovie(w, r, movie)
+		if err != nil {
+			fmt.Println(err.Error())
+			writeStatusMessage(w, http.StatusBadRequest, err.Error())
+		}
 
 	} else if insertionElement == "S" {
 
@@ -255,4 +277,5 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 		writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
 		return
 	}
+	fmt.Println("Finish inserting content!")
 }

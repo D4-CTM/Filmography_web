@@ -17,9 +17,16 @@ function handleResponse(event) {
     // mainly use for panel changes, when there's no need to reload
     if (status === "202") {
         return ;
+    } else if (status === "201") {
+        alert(message);
+        setTimeout(() => {
+            window.location.reload(); // Forces full reload after redirect
+        }, 100); // Small delay to ensure redirection is processed
     } else if (status === "200") {
         alert(message);
     } else if (status === "400") {
+        alert(message);
+    } else if (status === "500") {
         alert(message);
     } else {
         alert("Something went wrong. Please try again.");
@@ -100,10 +107,15 @@ function showSeriesOptions() {
     const headerText = document.getElementsByClassName("ft-lobster");
 
     headerText[0].innerText = "Register episode";
-    imgContainer.src = "/backend/imgs/series.svg"
+    imgContainer.src = "/backend/imgs/series.svg";
     contentName.innerText = "Episode name*:";
     seriesName.style.display = "flex";
     poster.style.display = "flex";
+}
+
+function changePoster(posterUrl) {
+    const imgContainer = document.getElementById("image-container");
+    imgContainer.src = posterUrl;
 }
 
 function changeStars(stars) {

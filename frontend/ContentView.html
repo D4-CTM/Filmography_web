@@ -1,13 +1,28 @@
 {{ define "app-content" }}
-    <div class="bg-container fl-col center-all">
-        <div class="view-header">
-            
+    <div class="bg-container fl-col center-all scrollable">
+        <div class="view-header fl-row fill-between">
+            <div class="header-field search-field fl-row">
+                <input type="text" name="search-input" class="search-input" placeholder="Name/id of movie">
+                <button type="button" class="search-btn fa fas fa-search clickable-cursor"></button> 
+            </div>
+            <h1 class="ft-lobster">Content view</h1>
+            <div class="header-field fill-between fl-row center-all">
+                <a href="/content-register"><button type="button" class="content-button">Add content!</button></a>
+            </div>
         </div>
-        <div class="view-content">
-            
-        </div>
-        <div class="view-footer">
-            
+        <div class="view-content fl-col scrollable">
+            <div class="input-div fl-row center-all">
+                <div class="fl-row center-all">
+                    <div class="pad-x-10px">
+                        <input type="radio" name="content" value="M" checked>
+                        <label>Movies</label>
+                    </div>
+                    <div class="pad-x-10px">
+                        <input type="radio" name="content" value="S"">
+                        <label>Series</label>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {{ end }}

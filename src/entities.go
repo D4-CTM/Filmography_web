@@ -2,6 +2,7 @@ package renderer
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -10,7 +11,7 @@ import (
 type Users struct {
 	Id       int            `db:"id"`
 	Username string         `db:"username"`
-	Email    string         `db:"email"`
+    Email    string         `db:"email" json:"-"`
 	PfpUrl   sql.NullString `db:"pfp_url"`
 	Password int            `db:"password"`
 }
@@ -45,6 +46,22 @@ func (user *Users) Fetch(db *sqlx.DB) error {
     err := db.Get(user, `SELECT * FROM users WHERE username = $1 AND password = $2`, user.Username, user.Password)
     if err != nil {
         return fmt.Errorf("Crash while fetching the user! \nPlease check the username of password typed! \nerr.Error(): %v\n", err.Error())
+    }
+    return nil
+}
+
+func (user Users) ToJson() ([]byte, error) {
+    userJson, err := json.Marshal(user)    
+    if err != nil {
+        return nil, fmt.Errorf("Crash while parsing the user to json!\nerr.Error(): %v\n", err.Error())
+    }
+    return userJson, nil
+}
+
+func (user *Users) FromJson(userJson[]byte) error {
+    err := json.Unmarshal(userJson, user)
+    if err != nil {
+        return fmt.Errorf("Crash while serializing user from json!\nerr.Error() %v\n", err.Error())
     }
     return nil
 }
@@ -84,6 +101,10 @@ func (movie *Movies) Update(db *sqlx.DB) error {
 		return fmt.Errorf("Crash while updating movie!\nerr.Error(): %v\n", err.Error())
 	}
 	return nil
+}
+
+func (movie *Movies) Fetch(db *sqlx.DB) {
+    
 }
 
 type Series struct {

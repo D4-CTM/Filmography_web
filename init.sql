@@ -1,4 +1,3 @@
-
 create table if not exists users (
   id serial primary key,
   username VARCHAR(75) not null,
@@ -10,7 +9,7 @@ create table if not exists users (
 CREATE INDEX idx_email ON users(email);
 CREATE INDEX idx_login ON users(username, password);
 
-create procedure sp_insert_user(
+create OR REPLACE procedure sp_insert_user(
   OUT v_id INT,
   v_username VARCHAR(75),
   v_email VARCHAR(100),
@@ -20,13 +19,21 @@ create procedure sp_insert_user(
 language plpgsql
 as $$
 begin
+  IF EXISTS (SELECT 1 FROM users WHERE username = v_username) THEN
+    RAISE EXCEPTION 'Username already taken!';
+  END IF;
+
   INSERT INTO users(username, email, pfp_url, password)
   VALUES(v_username, v_email, v_pfp_url, v_password)
   RETURNING id INTO v_id;
+
+  EXCEPTION
+      WHEN OTHERS THEN
+          RAISE;
 end;
 $$
 
-create procedure sp_update_user(
+create or replace procedure sp_update_user(
   v_id int,
   v_username VARCHAR(75),
   v_email VARCHAR(100),
@@ -36,6 +43,10 @@ create procedure sp_update_user(
 language plpgsql
 as $$
 begin
+  IF EXISTS (SELECT 1 FROM users WHERE username = v_username) THEN
+    RAISE EXCEPTION 'Username already taken!';
+  END IF;
+
   update users
   set 
     username = v_username,
@@ -44,6 +55,10 @@ begin
     password = v_password
   where
     id = v_id;
+
+  EXCEPTION
+      WHEN OTHERS THEN
+          RAISE;
 end;
 $$
 
@@ -68,8 +83,16 @@ CREATE OR REPLACE PROCEDURE sp_insert_movie(
     p_added_by INT
 ) AS $$
 BEGIN
-    INSERT INTO movies (name, description, poster_url, stars, added_by)
-    VALUES (p_name, p_description, p_poster_url, p_stars, p_added_by);
+  IF EXISTS (SELECT 1 FROM movies WHERE name = p_name) THEN
+    RAISE EXCEPTION 'Already exists a movie with that name!';
+  END IF;
+  
+  INSERT INTO movies (name, description, poster_url, stars, added_by)
+  VALUES (p_name, p_description, p_poster_url, p_stars, p_added_by);
+
+  EXCEPTION
+      WHEN OTHERS THEN
+          RAISE;
 END;
 $$ LANGUAGE plpgsql;
 
