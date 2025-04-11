@@ -121,3 +121,20 @@ type SeriesPoster struct {
 	SeriesName sql.NullString `db:"series_name"`
     PosterUrl  sql.NullString `db:"poster_url"`
 }
+
+func GetSeriesPosters(db *sqlx.DB) ([]SeriesPoster, error) {
+    var seriesPosters []SeriesPoster
+    err := db.Select(&seriesPosters, `SELECT * FROM series_posters`)
+    if err != nil {
+        return nil, fmt.Errorf("Crash while getting the series posters!\nerr.Error(): %v\n", err.Error())
+    }
+    seriePoster := SeriesPoster{
+        Id: 0,
+        SeriesName: sql.NullString{ String: "Add new serie", Valid: true },
+        PosterUrl: sql.NullString{ String: DEFAULT_SERIES_POSTER, Valid: true },
+    }
+    seriesPosters = append(seriesPosters, seriePoster)
+
+    return seriesPosters, nil
+}
+

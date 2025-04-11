@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-func renderFullTemplate(w http.ResponseWriter, content map[string]any, paths ...string) {
+func renderFullTemplate(w http.ResponseWriter, data map[string]any, paths ...string) {
 	files := []string{"./frontend/Layout.html"}
 	files = append(files, paths...)
 
@@ -18,8 +18,9 @@ func renderFullTemplate(w http.ResponseWriter, content map[string]any, paths ...
 		fmt.Println(errMsg)
 		return
 	}
-	err = tmpl.Execute(w, content)
-	if err != nil {
+	
+    err = tmpl.Execute(w, data)
+    if err != nil {
 		errMsg := fmt.Sprintf("Crash while executing full template!\nerr.Error(): %v\n", err.Error())
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		fmt.Println(errMsg)
@@ -79,8 +80,6 @@ func HandleViewContent(w http.ResponseWriter, r *http.Request) {
         return
     }
     
-    fmt.Println(user)
-
     renderFullTemplate(w, nil, toHTML("ContentView"))
 }
 
@@ -110,6 +109,24 @@ func HandleRegisterContent(w http.ResponseWriter, r *http.Request) {
         writeStatusMessage(w, http.StatusInternalServerError, err.Error())
         return
     }
+    con, err := getConnetion()
+    if err != nil {
+        fmt.Println(err.Error())
+        writeStatusMessage(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+    defer con.Close()
 
-    renderFullTemplate(w, nil, toHTML("ContentRegister"))
+    posters, err := GetSeriesPosters(con)
+    if err != nil {
+        fmt.Println(err.Error())
+        writeStatusMessage(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+
+    content := map[string]any{
+        "SeriesPosters": posters,
+    }
+    
+    renderFullTemplate(w, content, toHTML("ContentRegister"))
 }

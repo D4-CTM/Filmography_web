@@ -130,7 +130,8 @@ body {
   padding-right: 16px;
   padding-top: 8px;
   padding-bottom: 8px;
-  border: none;
+  transition: border 0.2s ease;
+  border: 3px solid gray;
   outline: none;
 }
 
@@ -141,7 +142,8 @@ body {
 }
 
 .search-field,
-.rvl-pass {
+.rvl-pass,
+.gray-bor {
   background-color: white;
   transition: border 0.2s ease;
   border: 3px solid gray;

@@ -5,16 +5,16 @@
         <div class="form-content fl-col center-all">
             <div class="fl-row center-all fl-wrap fl">
                 <div class="fl-col center-all fl lt-pad">
-                    <select id="poster-selector" class="selector hidden-component" name="series-poster">
-                        <option value="new-poster!">Insert new poster</option>
-                        {{ range "series-posters" }}                        
-                            <option value="{{ .Id }}" onselect="changePoster('{{ .PosterUrl }}')">{{ .SeriesName }}</option>
+                    <select id="poster-selector" class="selector hidden-component" name="series-poster"
+                        onchange="changePoster(this.options[this.selectedIndex].dataset.poster)">
+                        {{ range .SeriesPosters }}
+                            <option value="{{ .Id }}" data-poster="changePoster('{{ .PosterUrl.String }}')">{{.SeriesName.String }}</option>
                         {{ end }}
                     </select>
                     <button type="button" class="poster-container"
                         onclick="document.getElementById('image-hidden').click()">
-                        <img src="/backend/imgs/movies.svg"
-                            referrerpolicy="no-referrer" id="image-container" class="poster clickable-cursor">
+                        <img src="/backend/imgs/movies.svg" referrerpolicy="no-referrer" id="image-container"
+                            class="poster clickable-cursor">
                     </button>
                 </div>
                 <div class="fl-col center-all scrollable fl lt-pad">
@@ -47,18 +47,29 @@
                     <div class="input-div fl-col center-all">
                         <p>Stars:</p>
                         <div class="fl-row center-all">
-                            <button type="button" name="rating-btn" class="free-rating-btn rating-btn fa fa-solid fa-star" onclick="changeStars(1)"></button>
-                            <button type="button" name="rating-btn" class="free-rating-btn rating-btn fa fa-solid fa-star" onclick="changeStars(2)"></button>
-                            <button type="button" name="rating-btn" class="free-rating-btn rating-btn fa fa-solid fa-star" onclick="changeStars(3)"></button>
-                            <button type="button" name="rating-btn" class="free-rating-btn rating-btn fa fa-solid fa-star" onclick="changeStars(4)"></button>
-                            <button type="button" name="rating-btn" class="free-rating-btn rating-btn fa fa-solid fa-star" onclick="changeStars(5)"></button>
+                            <button type="button" name="rating-btn"
+                                class="free-rating-btn rating-btn fa fa-solid fa-star"
+                                onclick="changeStars(1)"></button>
+                            <button type="button" name="rating-btn"
+                                class="free-rating-btn rating-btn fa fa-solid fa-star"
+                                onclick="changeStars(2)"></button>
+                            <button type="button" name="rating-btn"
+                                class="free-rating-btn rating-btn fa fa-solid fa-star"
+                                onclick="changeStars(3)"></button>
+                            <button type="button" name="rating-btn"
+                                class="free-rating-btn rating-btn fa fa-solid fa-star"
+                                onclick="changeStars(4)"></button>
+                            <button type="button" name="rating-btn"
+                                class="free-rating-btn rating-btn fa fa-solid fa-star"
+                                onclick="changeStars(5)"></button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="form-buttons fl-row center-fill">
-            <a href="/content-view"><input type="button" class="submit-button cancel-btn clickable-cursor" value="Cancel"></a>
+            <a href="/content-view"><input type="button" class="submit-button cancel-btn clickable-cursor"
+                    value="Cancel"></a>
             <input type="submit" value="Register" class="submit-button accept-btn clickable-cursor"
                 hx-post="/register-content/" hx-on::before-request="validateForm(event)"
                 hx-on::after-request="handleResponse(event)">

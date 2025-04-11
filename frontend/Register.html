@@ -1,42 +1,44 @@
 {{ define "app-content" }}
-    <div class="bg-container fl-col center-all"> 
-        <h1 class="ft-lobster">Register user</h1>
-        <form class="fl-col center-all" 
-            enctype="multipart/form-data"
-            hx-encoding="multipart/form-data">
-            <div class="form-content fl-col center-all">
-                <div class="input-div fl-col fl center-all scrollable">
-                    <button type="button" class="pfp-container" onclick="document.getElementById('image-hidden').click()">
-                        <img src="/backend/imgs/default_pfp.png" referrerpolicy="no-referrer" id="image-container" class="pfp clickable-cursor">
-                    </button>
-                </div>
-                <div class="input-div fl-col center-all">
-                    <p>Username*:</p>
-                    <input type="text" name="username" minlength="4"  placeholder="Josh" required>
-                </div>
-                <div class="input-div fl-col center-all">
-                    <p>Email*:</p>
-                    <input type="email" name="email" placeholder="example123@gmail.com" required>
-                </div>
-                <div class="input-div fl-col center-all">
-                    <p>Password*:</p>
-                    <span class="rvl-pass fl-row center-all"><input type="password" minlength="6" class="password-fld" name="password" placeholder="password123" required><button class="rvl-button fa fa-eye" onclick="revealPass(this)" type="button"/></span>
-                </div>
-                <div class="input-div fl-col center-all">
-                    <p>Confirm password*:</p>
-                    <span class="rvl-pass fl-row center-all"><input type="password" minlength="6" class="password-fld" name="confirm-password" placeholder="password123" required><button class="rvl-button fa fa-eye" onclick="revealPass(this)" type="button"/></span>
-                </div>
+<div class="bg-container fl-col center-all">
+    <h1 class="ft-lobster">Register user</h1>
+    <form class="fl-col center-all" enctype="multipart/form-data" hx-encoding="multipart/form-data">
+        <div class="form-content fl-col center-all">
+            <div class="input-div fl-col fl center-all scrollable">
+                <button type="button" class="pfp-container" onclick="document.getElementById('image-hidden').click()">
+                    <img src="/backend/imgs/default_pfp.png" referrerpolicy="no-referrer" id="image-container"
+                        class="pfp clickable-cursor">
+                </button>
             </div>
-            <div class="form-buttons fl-row center-fill fl-wrap">
-                <input type="submit" class="submit-button cancel-btn clickable-cursor" value="Cancel">
-                <input type="submit" value="Register"
-                    class="submit-button accept-btn clickable-cursor"
-                    hx-post="/register-user/"
-                    hx-on::before-request="validateRegister(event)"
-                    hx-on::after-request="handleResponse(event)">
+            <div class="input-div fl-col center-all">
+                <p>Username*:</p>
+                <input type="text" name="username" minlength="4" placeholder="Josh" required>
             </div>
-            <input type="file" name="pfp" id="image-hidden" class="hidden-component" value="/backend/imgs/default_pfp.png" accept="image/*" onchange="changeImage(this.files[0])">
-            <p>Already have an account? <a href="/login">register here</a></p>
-        </form>
-    </div>
+            <div class="input-div fl-col center-all">
+                <p>Email*:</p>
+                <input type="email" name="email" placeholder="example123@gmail.com" required>
+            </div>
+            <div class="input-div fl-col center-all">
+                <p>Password*:</p>
+                <span class="rvl-pass fl-row center-all"><input type="password" minlength="6" class="password-fld"
+                        name="password" placeholder="password123" required><button class="rvl-button fa fa-eye"
+                        onclick="revealPass(this)" type="button" /></span>
+            </div>
+            <div class="input-div fl-col center-all">
+                <p>Confirm password*:</p>
+                <span class="rvl-pass fl-row center-all"><input type="password" minlength="6" class="password-fld"
+                        name="confirm-password" placeholder="password123" required><button class="rvl-button fa fa-eye"
+                        onclick="revealPass(this)" type="button" /></span>
+            </div>
+        </div>
+        <div class="form-buttons fl-row center-fill fl-wrap">
+            <input type="submit" class="submit-button cancel-btn clickable-cursor" value="Cancel">
+            <input type="submit" value="Register" class="submit-button accept-btn clickable-cursor"
+                hx-post="/register-user/" hx-on::before-request="validateRegister(event)"
+                hx-on::after-request="handleResponse(event)">
+        </div>
+        <input type="file" name="pfp" id="image-hidden" class="hidden-component" value="/backend/imgs/default_pfp.png"
+            accept="image/*" onchange="changeImage(this.files[0])">
+        <p>Already have an account? <a href="/login">log in here</a></p>
+    </form>
+</div>
 {{ end }}
