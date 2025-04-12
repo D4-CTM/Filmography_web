@@ -204,11 +204,14 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 
 	imgResult := uploadImage(file, header.Filename)
 	if imgResult != nil {
-		imgUrl = imgResult.Url
+		fmt.Println("Image uploaded")
+        imgUrl = imgResult.Url
 	}
 
-	movie.PosterUrl = sql.NullString{String: imgUrl, Valid: len(imgUrl) > 0}
-	err = movie.Update(con)
+    fmt.Printf("\n\timgUrl: %s\n", imgUrl)
+    movie.PosterUrl = sql.NullString{String: imgUrl, Valid: len(imgUrl) > 0}
+    fmt.Printf("\n\tMovie content: %v\n\tPoster: %v\n", movie, movie.PosterUrl)
+    err = movie.Update(con)
 	if err != nil {
 		errMsg := fmt.Sprintf("\nCrash while inserting the movie poster!\nerr.Error(): %v\n", err.Error())
 		fmt.Println(errMsg)
@@ -220,7 +223,7 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 }
 
 func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting content register!")
+	fmt.Println("Starting content register process!")
 
 	contentName := r.PostFormValue("name")
 	description := r.PostFormValue("description")
@@ -254,28 +257,29 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	insertionElement := r.PostFormValue("content")
-	if insertionElement == "M" {
 
-		movie := Movies{
-			Name:        contentName,
-			Description: sql.NullString{String: description, Valid: len(description) > 0},
-			Stars:       int16(rating),
-			AddedBy:     user.Id,
-			PosterUrl:   sql.NullString{String: DEFAULT_MOVIE_POSTER, Valid: true},
-		}
+    switch (insertionElement) {
+        case "M":
+            movie := Movies{
+                Name:        contentName,
+                Description: sql.NullString{String: description, Valid: len(description) > 0},
+                Stars:       int16(rating),
+                AddedBy:     user.Id,
+                PosterUrl:   sql.NullString{String: DEFAULT_MOVIE_POSTER, Valid: true},
+            }
 
-		err = insertMovie(w, r, movie)
-		if err != nil {
-			fmt.Println(err.Error())
-			writeStatusMessage(w, http.StatusBadRequest, err.Error())
-		}
+            err = insertMovie(w, r, movie)
+            if err != nil {
+                fmt.Println(err.Error())
+                writeStatusMessage(w, http.StatusBadRequest, err.Error())
+            }
+       
+        case "S": 
 
-	} else if insertionElement == "S" {
 
-	} else {
-		fmt.Println("Didn't select any!")
-		writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
-		return
-	}
-	fmt.Println("Finish inserting content!")
+        default:    
+            fmt.Println("Didn't select any!")
+            writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
+    }
+	fmt.Println("Finish insertion process content!")
 }

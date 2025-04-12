@@ -76,12 +76,12 @@ type Movies struct {
 }
 
 func (movie *Movies) Insert(db *sqlx.DB) error {
-	_, err := db.Exec(`CALL sp_insert_movie($1,$2,$3,$4,$5)`,
+	err := db.QueryRowx(`SELECT * FROM fn_insert_movie($1,$2,$3,$4,$5)`,
 		movie.Name,
 		movie.Description,
 		movie.PosterUrl,
 		movie.Stars,
-		movie.AddedBy)
+		movie.AddedBy).Scan(&movie.Id)
 
 	if err != nil {
 		return fmt.Errorf("Crash while inserting movie!\nerr.Error(): %v\n", err.Error())
@@ -103,11 +103,7 @@ func (movie *Movies) Update(db *sqlx.DB) error {
 	return nil
 }
 
-func (movie *Movies) Fetch(db *sqlx.DB) {
-    
-}
-
-type Series struct {
+type Episode struct {
 	Id          int            `db:"id"`
 	Name        string         `db:"name"`
 	Description sql.NullString `db:"description"`
@@ -120,6 +116,26 @@ type SeriesPoster struct {
 	Id         int            `db:"id"`
 	SeriesName sql.NullString `db:"series_name"`
     PosterUrl  sql.NullString `db:"poster_url"`
+}
+
+type SeriesEpisode struct {
+    Serie Episode
+    Poster SeriesPoster
+}
+
+func (episode *SeriesEpisode) Insert(db *sqlx.DB) error {
+    _, err := db.Exec(`CALL sp_insert_episode($1,$2,$3,$4,$5,$6,$7)`,
+        episode.Serie.Name,
+        episode.Serie.Description,
+        episode.Serie.Stars,
+        episode.Serie.PosterId,
+        episode.Serie.AddedBy,
+        episode.Poster.SeriesName,
+        episode.Poster.PosterUrl)
+    if err != nil {
+        return fmt.Errorf("Crash while inserting the episode!\nerr.Error(): %v\n", err.Error())
+    }
+    return nil
 }
 
 func GetSeriesPosters(db *sqlx.DB) ([]SeriesPoster, error) {
@@ -136,5 +152,18 @@ func GetSeriesPosters(db *sqlx.DB) ([]SeriesPoster, error) {
     seriesPosters = append(seriesPosters, seriePoster)
 
     return seriesPosters, nil
+}
+
+func FetchMovieList(db *sqlx.DB) ([]Movies, error) {
+    query := `
+        SELECT *
+        FROM movies`
+
+    var movieList []Movies
+    err := db.Select(&movieList, query)
+    if err != nil {
+        return nil, fmt.Errorf("Crash while fetching the movie list!\nerr.Error(): %v\n", err.Error())
+    }
+    return movieList, nil
 }
 

@@ -74,21 +74,22 @@ create table if not exists movies (
 
 CREATE INDEX idx_movie_name ON movies(name);
 
--- created by chatgpt
 CREATE OR REPLACE PROCEDURE sp_insert_movie(
-    p_name VARCHAR(75),
-    p_description VARCHAR(150),
-    p_poster_url VARCHAR(255),
-    p_stars SMALLINT,
-    p_added_by INT
+    OUT v_movie_id INT,
+    v_name VARCHAR(75),
+    v_description VARCHAR(150),
+    v_poster_url VARCHAR(255),
+    v_stars SMALLINT,
+    v_added_by INT
 ) AS $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM movies WHERE name = p_name) THEN
+  IF EXISTS (SELECT 1 FROM movies WHERE name = v_name) THEN
     RAISE EXCEPTION 'Already exists a movie with that name!';
   END IF;
   
   INSERT INTO movies (name, description, poster_url, stars, added_by)
-  VALUES (p_name, p_description, p_poster_url, p_stars, p_added_by);
+  VALUES (v_name, v_description, v_poster_url, v_stars, v_added_by)
+  RETURNING id INTO v_movie_id;
 
   EXCEPTION
       WHEN OTHERS THEN
@@ -173,19 +174,19 @@ DECLARE v_id INT;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM series_posters WHERE series_name = v_series_name) THEN
         INSERT INTO series_posters(series_name, poster_url)
-        VALUES(v_series_name, v_poster_url);
+        VALUES(v_series_name, v_poster_url) RETURNING id INTO v_id;
+    ELSE    
+        SELECT id
+        INTO v_id
+        FROM series_posters
+        WHERE series_name = v_series_name
     END IF;
-
-    SELECT id
-    INTO v_id
-    FROM series_posters
-    WHERE series_name = v_series_name;
-    
+ 
     UPDATE episodes
     SET name = v_name,
     description = v_description,
     stars = v_stars,
-    poster_id = v_poster_id,
+    poster_id = v_id,
     added_by = v_added_by
     WHERE id = v_episode_id;
 END;

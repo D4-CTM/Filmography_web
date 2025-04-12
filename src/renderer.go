@@ -79,8 +79,26 @@ func HandleViewContent(w http.ResponseWriter, r *http.Request) {
         writeStatusMessage(w, http.StatusInternalServerError, err.Error())
         return
     }
+    con, err := getConnetion()
+    if err != nil {
+        fmt.Println(err.Error())
+        writeStatusMessage(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+    defer con.Close()
     
-    renderFullTemplate(w, nil, toHTML("ContentView"))
+    movieList, err := FetchMovieList(con)
+    if err != nil {
+        fmt.Println(err.Error())
+        writeStatusMessage(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+    
+    content := map[string]any {
+        "ContentList": movieList,
+    }
+
+    renderFullTemplate(w, content, toHTML("ContentView"))
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
