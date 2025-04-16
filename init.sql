@@ -74,14 +74,15 @@ create table if not exists movies (
 
 CREATE INDEX idx_movie_name ON movies(name);
 
-CREATE OR REPLACE PROCEDURE sp_insert_movie(
-    OUT v_movie_id INT,
+CREATE OR REPLACE FUNCTION fn_insert_movie(
     v_name VARCHAR(75),
     v_description VARCHAR(150),
     v_poster_url VARCHAR(255),
     v_stars SMALLINT,
     v_added_by INT
-) AS $$
+) 
+RETURNS INT AS $$
+DECLARE v_id INT;
 BEGIN
   IF EXISTS (SELECT 1 FROM movies WHERE name = v_name) THEN
     RAISE EXCEPTION 'Already exists a movie with that name!';
@@ -89,8 +90,9 @@ BEGIN
   
   INSERT INTO movies (name, description, poster_url, stars, added_by)
   VALUES (v_name, v_description, v_poster_url, v_stars, v_added_by)
-  RETURNING id INTO v_movie_id;
+  RETURNING id INTO v_id;
 
+  RETURN v_id;
   EXCEPTION
       WHEN OTHERS THEN
           RAISE;
@@ -135,7 +137,7 @@ create table if not exists series_posters (
 CREATE INDEX idx_episode_name ON episodes(name);
 CREATE INDEX idx_series_name ON series_posters(series_name);
 
-CREATE OR REPLACE PROCEDURE sp_insert_episode(
+CREATE OR REPLACE FUNCTION fn_insert_episode(
   v_name VARCHAR(75),
   v_description VARCHAR(125),
   v_stars SMALLINT,
@@ -143,8 +145,9 @@ CREATE OR REPLACE PROCEDURE sp_insert_episode(
   v_added_by INT,
   v_series_name VARCHAR(50),
   v_poster_url VARCHAR(255)
-) AS $$
-DECLARE v_id INT;
+) RETURNS INT AS $$
+DECLARE v_poster_id INT;
+DECLARE v_episode_id INT;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM series_posters WHERE series_name = v_series_name) THEN
         INSERT INTO series_posters(series_name, poster_url)
@@ -152,12 +155,15 @@ BEGIN
     END IF;
 
     SELECT id
-    INTO v_id
+    INTO v_poster_id
     FROM series_posters
     WHERE series_name = v_series_name;
 
     INSERT INTO episodes(name, description, stars, poster_id, added_by)
-    VALUES(v_name, v_description, v_stars, v_poster_id, v_added_by);
+    VALUES(v_name, v_description, v_stars, v_poster_id, v_added_by)
+    RETURNING id INTO v_episode_id;
+    
+    RETURN v_episode_id;
 END;
 $$ LANGUAGE plpgsql;
 

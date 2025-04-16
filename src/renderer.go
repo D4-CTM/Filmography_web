@@ -94,8 +94,16 @@ func HandleViewContent(w http.ResponseWriter, r *http.Request) {
         return
     }
     
+    seriesList, err := FetchEpisodesList(con)
+    if err != nil {
+        fmt.Println(err.Error())
+        writeStatusMessage(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+
     content := map[string]any {
-        "ContentList": movieList,
+        "MovieList": movieList,
+        "SerieList": seriesList,
     }
 
     renderFullTemplate(w, content, toHTML("ContentView"))

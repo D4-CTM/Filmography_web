@@ -6,21 +6,21 @@
             <div class="fl-row center-all fl-wrap fl">
                 <div class="fl-col center-all fl lt-pad">
                     <select id="poster-selector" class="selector hidden-component" name="series-poster"
-                        onchange="changePoster(this.options[this.selectedIndex].dataset.poster)">
+                        onchange="setSelectedPoster(this.options[this.selectedIndex].dataset.poster)">
                         {{ range .SeriesPosters }}
-                            <option value="{{ .Id }}" data-poster="changePoster('{{ .PosterUrl.String }}')">{{.SeriesName.String }}</option>
+                            <option value="{{ .SeriesName.String }}" data-poster="{{ .PosterUrl.String }}">{{.SeriesName.String }}</option>
                         {{ end }}
                     </select>
                     <button type="button" class="poster-container"
-                        onclick="document.getElementById('image-hidden').click()">
+                        onclick="changePoster()">
                         <img src="/backend/imgs/movies.svg" referrerpolicy="no-referrer" id="image-container"
                             class="poster clickable-cursor">
                     </button>
                 </div>
                 <div class="fl-col center-all fl lt-pad">
-                    <div id="series-name" class="input-div fl-col center-all hidden-component">
+                    <div id="series-name-div" class="input-div fl-col center-all hidden-component">
                         <p>Series name*:</p>
-                        <input type="text" name="series-name" minlength="4" placeholder="Series name">
+                        <input type="text" name="series-name" id="series-name" minlength="4" placeholder="Series name">
                     </div>
                     <div class="input-div fl-col center-all">
                         <p id="content-name">Movie name*:</p>

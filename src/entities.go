@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -124,12 +125,26 @@ type SeriesEpisode struct {
 }
 
 func (episode *SeriesEpisode) Insert(db *sqlx.DB) error {
-    _, err := db.Exec(`CALL sp_insert_episode($1,$2,$3,$4,$5,$6,$7)`,
+    err := db.QueryRowx(`SELECT * FROM fn_insert_episode($1,$2,$3,$4,$5,$6,$7)`,
         episode.Serie.Name,
         episode.Serie.Description,
         episode.Serie.Stars,
         episode.Serie.PosterId,
         episode.Serie.AddedBy,
+        episode.Poster.SeriesName,
+        episode.Poster.PosterUrl).Scan(&episode.Serie.Id)
+    if err != nil {
+        return fmt.Errorf("Crash while inserting the episode!\nerr.Error(): %v\n", err.Error())
+    }
+    return nil
+}
+
+func (episode *SeriesEpisode) Update(db *sqlx.DB) error {
+    _, err := db.Exec(`CALL sp_update_episode($1,$2,$3,$4,$5,$6)`,
+        episode.Serie.Id,
+        episode.Serie.Name,
+        episode.Serie.Description,
+        episode.Serie.Stars,
         episode.Poster.SeriesName,
         episode.Poster.PosterUrl)
     if err != nil {
@@ -140,16 +155,17 @@ func (episode *SeriesEpisode) Insert(db *sqlx.DB) error {
 
 func GetSeriesPosters(db *sqlx.DB) ([]SeriesPoster, error) {
     var seriesPosters []SeriesPoster
-    err := db.Select(&seriesPosters, `SELECT * FROM series_posters`)
+    err := db.Select(&seriesPosters, `SELECT * FROM series_posters WHERE series_name != $1`, DEFAULT_SERIES_POSTER_NAME)
     if err != nil {
         return nil, fmt.Errorf("Crash while getting the series posters!\nerr.Error(): %v\n", err.Error())
     }
     seriePoster := SeriesPoster{
         Id: 0,
-        SeriesName: sql.NullString{ String: "Add new serie", Valid: true },
+        SeriesName: sql.NullString{ String: DEFAULT_SERIES_POSTER_NAME, Valid: true },
         PosterUrl: sql.NullString{ String: DEFAULT_SERIES_POSTER, Valid: true },
     }
     seriesPosters = append(seriesPosters, seriePoster)
+    slices.Reverse(seriesPosters)
 
     return seriesPosters, nil
 }
@@ -165,5 +181,51 @@ func FetchMovieList(db *sqlx.DB) ([]Movies, error) {
         return nil, fmt.Errorf("Crash while fetching the movie list!\nerr.Error(): %v\n", err.Error())
     }
     return movieList, nil
+}
+
+func convertPosterListToMap(series []SeriesPoster) (map[int]SeriesPoster) {
+    if len(series) == 0 {
+        return nil
+    }
+
+    serieMap := map[int]SeriesPoster{}
+    for _,serie := range series {
+        serieMap[serie.Id] = serie
+    }
+    return serieMap
+}
+
+func FetchEpisodesList(db *sqlx.DB) ([]SeriesEpisode, error) {
+    query := `
+        SELECT *
+        FROM episodes`
+    var seriesEpisodes []SeriesEpisode
+    var episodes []Episode
+    err := db.Select(&episodes, query)
+    if err != nil {
+        return nil, fmt.Errorf("Crash while fetching episodes list!\nerr.Error(): %v\n", err.Error())
+    }
+
+    query = `
+        SELECT *
+        FROM series_posters`
+    var posters []SeriesPoster
+    err = db.Select(&posters, query)
+    if err != nil {
+        return nil, fmt.Errorf("Crash while fetching poster list!\nerr.Error(): %v\n", err.Error())
+    }
+    posterMap := convertPosterListToMap(posters)
+    if posterMap == nil {
+        return nil, fmt.Errorf("Crash while converting to poster list to map\n")
+    }
+
+    var seriesEpisode SeriesEpisode
+    for _, episode := range episodes {
+        seriesEpisode = SeriesEpisode{Serie: episode, Poster: posterMap[int(episode.PosterId.Int32)]}
+        fmt.Println(seriesEpisode)
+        seriesEpisodes = append(seriesEpisodes, seriesEpisode)
+    }
+
+    return seriesEpisodes, nil
 }
 

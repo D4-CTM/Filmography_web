@@ -14,32 +14,48 @@
             <div class="input-div fl-row center-all">
                 <div class="fl-row center-all">
                     <div class="pad-x-10px">
-                        <input type="radio" name="content" value="M" checked>
+                        <input type="radio" name="content" value="M" onclick="showMovieTable()" checked>
                         <label>Movies</label>
                     </div>
                     <div class="pad-x-10px">
-                        <input type="radio" name="content" value="S"">
+                        <input type="radio" name="content" value="S" onclick="showSeriesTable()">
                         <label>Series</label>
                     </div>
                 </div>
             </div>
         </div>
         <div class="view-content fl-col scrollable">
-            <table id="content-table">
+            <table id="movie-table">
                 <tr>
                     <th class="poster-image"><h2>Poster</h2></th>
                     <th class="poster-name"><h2>Name</h2></th>
                     <th class="poster-rating"><h2>Rating</h2></th>
                     <th></th>
                 </tr>
-                {{ range .ContentList }}
-                    <tr>
-                        <td class="poster-image"><img src="{{ .PosterUrl.String }}"></td>
-                        <td class="poster-name"><h3>{{ .Name }}</h3></td>
-                        <td class="poster-rating">{{ .Stars }}  <i class="fa fa-star"></i></td>
-                        <td class="poster-remove"><button type="button" class="fa fa-trash"></button></td>
-                    </tr>
-                {{ end }}
+                    {{ range .MovieList }}
+                        <tr>
+                            <td class="poster-image"><img src="{{ .PosterUrl.String }}"></td>
+                            <td class="poster-name"><h3>{{ .Name }}</h3></td>
+                            <td class="poster-rating">{{ .Stars }}  <i class="fa fa-star"></i></td>
+                            <td class="poster-remove"><button type="button" class="fa fa-trash"></button></td>
+                        </tr>
+                    {{ end }}
+            </table>
+            <table id="series-table" class="hidden-component">
+                <tr>
+                    <th class="poster-image"><h2>Poster</h2></th>
+                    <th class="poster-name"><h2>Name</h2></th>
+                    <th class="poster-rating"><h2>Rating</h2></th>
+                    <th></th>
+                </tr>
+                    {{ range .SerieList }}
+                        <tr>
+                            <td class="poster-image"><img src="{{ .Poster.PosterUrl.String }}"></td>
+                            <td class="poster-name"><h3>{{ .Serie.Name }}</h3></td>
+                            <td class="poster-rating">{{ .Serie.Stars }}  <i class="fa fa-star"></i></td>
+                            <td class="poster-remove"><button type="button" class="fa fa-trash"></button></td>
+                        </tr>
+                    {{ end }}
             </table>
         </div>        
     </div>

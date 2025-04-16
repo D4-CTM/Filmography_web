@@ -87,35 +87,63 @@ function revealPass(element) {
 
 function showMovieOptions() {
     const poster = document.getElementById("poster-selector") ;
-    const seriesName = document.getElementById("series-name");
+    const seriesNameDiv = document.getElementById("series-name-div");
+    const seriesNameInput = document.getElementById("series-name");
     const contentName = document.getElementById("content-name");
     const imgContainer = document.getElementById("image-container");
     const headerText = document.getElementsByClassName("ft-lobster");
+    const posterSelector = document.getElementById("poster-selector");
+    const imageSelected = document.getElementById("image-hidden");
 
+    seriesNameInput.value = "";
+    imageSelected.value = "";
+    posterSelector.selectedIndex = 0;
     headerText[0].innerText = "Register movie";
     imgContainer.src = "/backend/imgs/movies.svg"
     contentName.innerText = "Movie name*:";
-    seriesName.style.display = "none";
+    seriesNameDiv.style.display = "none";
     poster.style.display = "none";
 }
 
 function showSeriesOptions() {
     const poster = document.getElementById("poster-selector");
-    const seriesName = document.getElementById("series-name");
+    const seriesNameDiv = document.getElementById("series-name-div");
+    const seriesNameInput = document.getElementById("series-name");
     const contentName = document.getElementById("content-name");
     const imgContainer = document.getElementById("image-container");
     const headerText = document.getElementsByClassName("ft-lobster");
-
+    const posterSelector = document.getElementById("poster-selector");
+    const imageSelected = document.getElementById("image-hidden");
+    
+    seriesNameInput.value = "";
+    imageSelected.value = ""; // this will reset the file
+    posterSelector.selectedIndex = 0;
     headerText[0].innerText = "Register episode";
     imgContainer.src = "/backend/imgs/series.svg";
     contentName.innerText = "Episode name*:";
-    seriesName.style.display = "flex";
+    seriesNameDiv.style.display = "flex";
     poster.style.display = "flex";
 }
 
-function changePoster(posterUrl) {
+function setSelectedPoster(posterUrl) {
+    const seriesNameInput = document.getElementById("series-name");
     const imgContainer = document.getElementById("image-container");
+    const posterSelector = document.getElementById("poster-selector");
+    
+    if (posterSelector.selectedIndex === 0) {
+        seriesNameInput.readOnly = true;
+        seriesNameInput.value = ""
+    } else {
+        seriesNameInput.readOnly = false;
+        seriesNameInput.value = posterSelector.value
+    }
     imgContainer.src = posterUrl;
+}
+
+function changePoster() {
+    if (document.getElementById("poster-selector").selectedIndex === 0) {
+        document.getElementById('image-hidden').click()
+    }
 }
 
 function changeStars(stars) {
@@ -137,5 +165,21 @@ function changeStars(stars) {
     }
 
     rating.value = stars;
+}
+
+function showMovieTable() {
+    const movieTable = document.getElementById("movie-table")
+    const seriesTable = document.getElementById("series-table")
+
+    movieTable.classList.remove("hidden-component")
+    seriesTable.classList.add("hidden-component")
+}
+
+function showSeriesTable() {
+    const movieTable = document.getElementById("movie-table")
+    const seriesTable = document.getElementById("series-table")
+
+    seriesTable.classList.remove("hidden-component")
+    movieTable.classList.add("hidden-component")
 }
 

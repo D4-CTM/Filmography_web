@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	DEFAULT_MOVIE_POSTER  string = "https://ik.imagekit.io/FilmPost/movies.svg?updatedAt=1743831041071"
-	DEFAULT_SERIES_POSTER string = "https://ik.imagekit.io/FilmPost/series.svg?updatedAt=1743831042090"
-	DEFAULT_USER_PFP      string = "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769"
+	DEFAULT_SERIES_POSTER_NAME string = "Add new series"
+	DEFAULT_MOVIE_POSTER       string = "https://ik.imagekit.io/FilmPost/movies.svg?updatedAt=1743831041071"
+	DEFAULT_SERIES_POSTER      string = "https://ik.imagekit.io/FilmPost/series.svg?updatedAt=1743831042090"
+	DEFAULT_USER_PFP           string = "https://ik.imagekit.io/FilmPost/default_pfp.png?updatedAt=1743482764769"
 )
 
 var images *imagekit.ImageKit
@@ -116,7 +117,7 @@ func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-    imgUrl := DEFAULT_USER_PFP
+	imgUrl := DEFAULT_USER_PFP
 
 	imgResult := uploadImage(file, header.Filename)
 	if imgResult != nil {
@@ -200,18 +201,16 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 		return nil
 	}
 	defer file.Close()
-	imgUrl := DEFAULT_MOVIE_POSTER
 
-	imgResult := uploadImage(file, header.Filename)
-	if imgResult != nil {
-		fmt.Println("Image uploaded")
-        imgUrl = imgResult.Url
+	imgUrl := uploadImage(file, header.Filename)
+	if imgUrl == nil {
+		return fmt.Errorf("Crash on poster upload!")
 	}
 
-    fmt.Printf("\n\timgUrl: %s\n", imgUrl)
-    movie.PosterUrl = sql.NullString{String: imgUrl, Valid: len(imgUrl) > 0}
-    fmt.Printf("\n\tMovie content: %v\n\tPoster: %v\n", movie, movie.PosterUrl)
-    err = movie.Update(con)
+	fmt.Printf("\n\timgUrl: %s\n", imgUrl.Url)
+	movie.PosterUrl = sql.NullString{String: imgUrl.Url, Valid: len(imgUrl.Url) > 0}
+	fmt.Printf("\n\tMovie content: %v\n\tPoster: %v\n", movie, movie.PosterUrl)
+	err = movie.Update(con)
 	if err != nil {
 		errMsg := fmt.Sprintf("\nCrash while inserting the movie poster!\nerr.Error(): %v\n", err.Error())
 		fmt.Println(errMsg)
@@ -219,6 +218,74 @@ func insertMovie(w http.ResponseWriter, r *http.Request, movie Movies) error {
 	}
 
 	writeStatusMessage(w, http.StatusCreated, "Movie registered succesfully!")
+	return nil
+}
+
+func insertEpisode(w http.ResponseWriter, r *http.Request, episode SeriesEpisode) error {
+	con, err := getConnetion()
+	if err != nil {
+		return err
+	}
+	defer con.Close()
+
+	err = episode.Insert(con)
+	if err != nil {
+		return err
+	}
+
+	seriesPosterName := r.PostFormValue("series-poster")
+
+	// We simply check if the series is specified
+	if len(seriesPosterName) == 0 {
+		writeStatusMessage(w, http.StatusCreated, "Episode registered without a poster!")
+		return nil
+	}
+
+    seriesName := r.PostFormValue("series-name")
+    if len(seriesName) == 0 {
+		writeStatusMessage(w, http.StatusCreated, "Episode registered without a poster!")
+		return nil 
+    }
+    episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
+
+	r.ParseMultipartForm(10 << 20)
+	file, header, err := r.FormFile("poster")
+	if err != nil {
+        if seriesPosterName != DEFAULT_SERIES_POSTER_NAME {
+            err = episode.Update(con)
+            if err != nil {
+                errMsg := fmt.Sprintf("\nCrash while specifying the series!\nerr.Error(): %v\n", err.Error())
+                fmt.Println(errMsg)
+                return fmt.Errorf(errMsg)
+            }
+
+            writeStatusMessage(w, http.StatusCreated, "Episode registered succesfully!")
+            return nil
+        }
+
+        fmt.Printf("\nEpisode: %s, registered without poster!\nerr.Error(): %s", episode.Serie.Name, err.Error())
+		writeStatusMessage(w, http.StatusCreated, "Episode registered without poster!")
+		return nil
+	}
+	defer file.Close()
+
+	imgUrl := uploadImage(file, header.Filename)
+	if imgUrl == nil {
+		return fmt.Errorf("Crash on poster upload!")
+	}
+
+	fmt.Printf("\n\timgUrl: %s\n", imgUrl.Url)
+	episode.Poster.PosterUrl = sql.NullString{String: imgUrl.Url, Valid: len(imgUrl.Url) > 0}
+    episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
+    fmt.Printf("\n\tEpisode content: %v\n\tPoster: %v\n", episode, episode.Poster.PosterUrl)
+	err = episode.Update(con)
+	if err != nil {
+		errMsg := fmt.Sprintf("\nCrash while inserting the series poster!\nerr.Error(): %v\n", err.Error())
+		fmt.Println(errMsg)
+		return fmt.Errorf(errMsg)
+	}
+
+	writeStatusMessage(w, http.StatusCreated, "Episode & serie registered succesfully!")
 	return nil
 }
 
@@ -258,28 +325,44 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 
 	insertionElement := r.PostFormValue("content")
 
-    switch (insertionElement) {
-        case "M":
-            movie := Movies{
-                Name:        contentName,
-                Description: sql.NullString{String: description, Valid: len(description) > 0},
-                Stars:       int16(rating),
-                AddedBy:     user.Id,
-                PosterUrl:   sql.NullString{String: DEFAULT_MOVIE_POSTER, Valid: true},
-            }
+	switch insertionElement {
+	case "M":
+		movie := Movies{
+			Name:        contentName,
+			Description: sql.NullString{String: description, Valid: len(description) > 0},
+			Stars:       int16(rating),
+			AddedBy:     user.Id,
+			PosterUrl:   sql.NullString{String: DEFAULT_MOVIE_POSTER, Valid: true},
+		}
 
-            err = insertMovie(w, r, movie)
-            if err != nil {
-                fmt.Println(err.Error())
-                writeStatusMessage(w, http.StatusBadRequest, err.Error())
-            }
-       
-        case "S": 
+		err = insertMovie(w, r, movie)
+		if err != nil {
+			fmt.Println(err.Error())
+			writeStatusMessage(w, http.StatusBadRequest, err.Error())
+		}
 
+	case "S":
+		episode := SeriesEpisode{
+			Serie: Episode{
+				Name:        contentName,
+				Description: sql.NullString{String: description, Valid: len(description) > 0},
+				Stars:       int16(rating),
+				AddedBy:     user.Id,
+			},
+			Poster: SeriesPoster{
+				SeriesName: sql.NullString{String: DEFAULT_SERIES_POSTER_NAME, Valid: true},
+				PosterUrl:  sql.NullString{String: DEFAULT_SERIES_POSTER, Valid: true},
+			},
+		}
 
-        default:    
-            fmt.Println("Didn't select any!")
-            writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
-    }
+		err = insertEpisode(w, r, episode)
+		if err != nil {
+			fmt.Println(err.Error())
+			writeStatusMessage(w, http.StatusBadRequest, err.Error())
+		}
+	default:
+		fmt.Println("Didn't select any!")
+		writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
+	}
 	fmt.Println("Finish insertion process content!")
 }
