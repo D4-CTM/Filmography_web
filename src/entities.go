@@ -222,7 +222,6 @@ func FetchEpisodesList(db *sqlx.DB) ([]SeriesEpisode, error) {
     var seriesEpisode SeriesEpisode
     for _, episode := range episodes {
         seriesEpisode = SeriesEpisode{Serie: episode, Poster: posterMap[int(episode.PosterId.Int32)]}
-        fmt.Println(seriesEpisode)
         seriesEpisodes = append(seriesEpisodes, seriesEpisode)
     }
 
