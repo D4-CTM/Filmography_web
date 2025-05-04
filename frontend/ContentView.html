@@ -1,11 +1,17 @@
 {{ define "app-content" }}
     <div class="bg-container fl-col center-all">
         <div class="view-header fl-row fill-between">
-            <div class="header-field search-field fl-row">
-                <input type="text" name="search-input" class="search-input" placeholder="Name/id of movie">
-                <button type="button" class="search-btn fa fas fa-search clickable-cursor"></button> 
+            <div class="fl-row center-all"> 
+                <button hx-post="/log-out/" hx-on::before-request="validateForm(event)"
+                hx-on::after-request="handleResponse(event)"
+                class="logout-btn mar-x-10px" type="button">
+                    <i class="fa fas fa-sign-out"></i>
+                </button>
+                <div class="header-field search-field fl-row">
+                    <input type="text" name="search-input" class="search-input" placeholder="Name/id of movie">
+                    <button type="button" class="search-btn fa fas fa-search clickable-cursor"></button> 
+                </div>
             </div>
-            <h1 class="ft-lobster">Content view</h1>
             <div class="header-field fill-between fl-row center-all">
                 <a href="/content-register"><button type="button" class="content-button">Add content!</button></a>
             </div>

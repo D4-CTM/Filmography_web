@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/imagekit-developer/imagekit-go"
 	"github.com/imagekit-developer/imagekit-go/api/uploader"
@@ -139,6 +140,23 @@ func EventRegisterUser(w http.ResponseWriter, r *http.Request) {
 	writeStatusMessage(w, http.StatusOK, "User succesfully registered!")
 }
 
+func EventLogOut(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Starting to log out")
+
+	cookie := &http.Cookie{
+		Name: "user-cookie",
+		Value: "",
+		Path: "/",
+		MaxAge: -1,
+		Expires: time.Unix(0,0),
+	}
+	http.SetCookie(w, cookie)
+
+	fmt.Println("\nYou've succesfully logged out!")
+	w.Header().Add("HX-Location", "/login")
+	writeStatusMessage(w, http.StatusOK, "Returning to login!")
+}
+
 func EventLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting login auth!")
 	con, err := getConnetion()
@@ -153,6 +171,9 @@ func EventLogin(w http.ResponseWriter, r *http.Request) {
 		Username: r.PostFormValue("username"),
 		Password: hash(r.PostFormValue("password")),
 	}
+	
+	fmt.Printf("\n\tPassword: %d\n\n", user.Password)
+
 	err = user.Fetch(con)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotAcceptable)

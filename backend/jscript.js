@@ -1,3 +1,20 @@
+// snippet made by chatGPT
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+let theme = localStorage.getItem('theme');
+if (!theme) {
+  theme = prefersDark ? 'dark' : 'light';
+}
+
+document.documentElement.setAttribute('data-theme', theme);
+// Later allow user to toggle
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const newTheme = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+}
+// snipper made by chatGPT
 
 // function made by chatgpt!
 document.addEventListener("htmx:afterRequest", function(evt) {

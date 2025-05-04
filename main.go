@@ -24,7 +24,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/backend/", http.StripPrefix("/backend/", static))
 	//functions of the backend
-    mux.HandleFunc("/login-user/", renderer.EventLogin)
+	mux.HandleFunc("/log-out/", renderer.EventLogOut)
+	mux.HandleFunc("/login-user/", renderer.EventLogin)
     mux.HandleFunc("/register-user/", renderer.EventRegisterUser)
     mux.HandleFunc("/register-content/", renderer.EventRegisterContent)
 	// actual sites on the page

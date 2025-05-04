@@ -6,10 +6,23 @@
     font-style: normal;
 }
 
-:root {
+:root[data-theme='light'] {
   --outer-bg: #e7cfbc;
   --inner-bg: #fff4ec;
+  
+  --content-add-btn-hov-bg: #ad7e5c;
+  --content-add-btn-bor-bg: #d0aa8e;
+}
 
+:root[data-theme='dark'] {
+  --outer-bg: #A15E49;
+  --inner-bg: #CA895F;
+  
+  --content-add-btn-hov-bg: #C77D58;
+  --content-add-btn-bor-bg: #CA895F;
+}
+
+:root {
   --cancel-btn-bg: #ec3832;
   --cancel-btn-bor-bg: #512828;
   --cancel-btn-fg: #ffffff;
@@ -26,14 +39,12 @@
   --free-rating-btn-bg: #EBEBEB;
   
   --content-add-btn-bg: #8c6041;
-  --content-add-btn-hov-bg: #ad7e5c;
-  --content-add-btn-bor-bg: #d0aa8e;
 }
 
 body {
   padding: 0;
   margin: 0;
-  font-family: 'open sans';
+  font-family: sans-serif, 'open sans';
 }
 
 .ft-lobster {
@@ -272,6 +283,11 @@ body {
     transition: background 0.2s ease;
 }
 
+.mar-x-10px {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 .pad-x-10px {
     padding-left: 10px;
     padding-right: 10px;
@@ -329,6 +345,10 @@ body {
 .content-button:hover {
    border-color: var(--content-add-btn-hov-bg); 
    background-color: var(--content-add-btn-hov-bg);  
+}
+
+.logout-btn {
+    font-size: 42px;
 }
 
 table {
