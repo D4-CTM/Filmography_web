@@ -144,11 +144,11 @@ func EventLogOut(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting to log out")
 
 	cookie := &http.Cookie{
-		Name: "user-cookie",
-		Value: "",
-		Path: "/",
-		MaxAge: -1,
-		Expires: time.Unix(0,0),
+		Name:    "user-cookie",
+		Value:   "",
+		Path:    "/",
+		MaxAge:  -1,
+		Expires: time.Unix(0, 0),
 	}
 	http.SetCookie(w, cookie)
 
@@ -171,7 +171,7 @@ func EventLogin(w http.ResponseWriter, r *http.Request) {
 		Username: r.PostFormValue("username"),
 		Password: hash(r.PostFormValue("password")),
 	}
-	
+
 	fmt.Printf("\n\tPassword: %d\n\n", user.Password)
 
 	err = user.Fetch(con)
@@ -262,29 +262,29 @@ func insertEpisode(w http.ResponseWriter, r *http.Request, episode SeriesEpisode
 		return nil
 	}
 
-    seriesName := r.PostFormValue("series-name")
-    if len(seriesName) == 0 {
+	seriesName := r.PostFormValue("series-name")
+	if len(seriesName) == 0 {
 		writeStatusMessage(w, http.StatusCreated, "Episode registered without a poster!")
-		return nil 
-    }
-    episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
+		return nil
+	}
+	episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
 
 	r.ParseMultipartForm(10 << 20)
 	file, header, err := r.FormFile("poster")
 	if err != nil {
-        if seriesPosterName != DEFAULT_SERIES_POSTER_NAME {
-            err = episode.Update(con)
-            if err != nil {
-                errMsg := fmt.Sprintf("\nCrash while specifying the series!\nerr.Error(): %v\n", err.Error())
-                fmt.Println(errMsg)
-                return fmt.Errorf(errMsg)
-            }
+		if seriesPosterName != DEFAULT_SERIES_POSTER_NAME {
+			err = episode.Update(con)
+			if err != nil {
+				errMsg := fmt.Sprintf("\nCrash while specifying the series!\nerr.Error(): %v\n", err.Error())
+				fmt.Println(errMsg)
+				return fmt.Errorf(errMsg)
+			}
 
-            writeStatusMessage(w, http.StatusCreated, "Episode registered succesfully!")
-            return nil
-        }
+			writeStatusMessage(w, http.StatusCreated, "Episode registered succesfully!")
+			return nil
+		}
 
-        fmt.Printf("\nEpisode: %s, registered without poster!\nerr.Error(): %s", episode.Serie.Name, err.Error())
+		fmt.Printf("\nEpisode: %s, registered without poster!\nerr.Error(): %s", episode.Serie.Name, err.Error())
 		writeStatusMessage(w, http.StatusCreated, "Episode registered without poster!")
 		return nil
 	}
@@ -297,8 +297,8 @@ func insertEpisode(w http.ResponseWriter, r *http.Request, episode SeriesEpisode
 
 	fmt.Printf("\n\timgUrl: %s\n", imgUrl.Url)
 	episode.Poster.PosterUrl = sql.NullString{String: imgUrl.Url, Valid: len(imgUrl.Url) > 0}
-    episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
-    fmt.Printf("\n\tEpisode content: %v\n\tPoster: %v\n", episode, episode.Poster.PosterUrl)
+	episode.Poster.SeriesName = sql.NullString{String: seriesName, Valid: true}
+	fmt.Printf("\n\tEpisode content: %v\n\tPoster: %v\n", episode, episode.Poster.PosterUrl)
 	err = episode.Update(con)
 	if err != nil {
 		errMsg := fmt.Sprintf("\nCrash while inserting the series poster!\nerr.Error(): %v\n", err.Error())
