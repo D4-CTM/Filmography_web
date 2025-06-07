@@ -32,18 +32,18 @@ function handleResponse(event) {
     let message = xhr.getResponseHeader("HX-Message");
     
     // mainly use for panel changes, when there's no need to reload
-    if (status === "202") {
+    if (status == "202") {
         return ;
-    } else if (status === "201") {
-        alert(message);
+    } else if (status == "201") {
         setTimeout(() => {
             window.location.reload(); // Forces full reload after redirect
         }, 100); // Small delay to ensure redirection is processed
-    } else if (status === "200") {
         alert(message);
-    } else if (status === "400") {
+    } else if (status == "200") {
         alert(message);
-    } else if (status === "500") {
+    } else if (status == "400") {
+        alert(message);
+    } else if (status == "500") {
         alert(message);
     } else {
         alert("Something went wrong. Please try again.");

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -46,7 +47,7 @@ func hash(str string) int {
 	return result
 }
 
-func InitImageKet() error {
+func InitImageKit() error {
 	ik, err := imagekit.New()
 	if err != nil {
 		return fmt.Errorf("There was an error initializing the image kit!\nerr.Error(): %v\n", err.Error())
@@ -63,6 +64,9 @@ func getConnetion() (*sqlx.DB, error) {
 	con, err := sqlx.Open("postgres", os.Getenv("CONNECTION_STRING"))
 	if err != nil {
 		return nil, fmt.Errorf("Crash while stablishing conection!\nerr.Error(): %v\n", err.Error())
+	}
+	if err := con.Ping(); err != nil {
+		return nil, fmt.Errorf("Could not reach DB: %v", err)
 	}
 	return con, nil
 }
@@ -386,4 +390,70 @@ func EventRegisterContent(w http.ResponseWriter, r *http.Request) {
 		writeStatusMessage(w, http.StatusBadRequest, "Please select what type of content are you rating!")
 	}
 	fmt.Println("Finish insertion process content!")
+}
+
+func extractFilePath(imageURL string) (string, error) {
+	parsed, err := url.Parse(imageURL)
+	if err != nil {
+		return "", err
+	}
+	return parsed.Path, nil
+}
+
+func EventDeleteEpisode(w http.ResponseWriter, r *http.Request) {
+	episodeName := r.PathValue("content")
+
+	id, err := strconv.Atoi(episodeName)
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, err := getConnetion()
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer db.Close()
+
+	err = DeleteEpisode(db, id)
+	if err != nil {
+		fmt.Println(err.Error())
+		writeStatusMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	writeStatusMessage(w, http.StatusCreated, "Movie removed from the list succesfully!")
+	fmt.Println("Movie removed!")
+}
+
+func EventDeleteMovie(w http.ResponseWriter, r *http.Request) {
+	movieId := r.PathValue("content")
+
+	id, err := strconv.Atoi(movieId)
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, err := getConnetion()
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer db.Close()
+
+	err = DeleteMovie(db, id)
+	if err != nil {
+		fmt.Println(err.Error())
+		writeStatusMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	writeStatusMessage(w, http.StatusCreated, "Movie removed from the list succesfully!")
+	fmt.Println("Movie removed!")
 }

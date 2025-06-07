@@ -183,6 +183,32 @@ func FetchMovieList(db *sqlx.DB) ([]Movies, error) {
     return movieList, nil
 }
 
+func DeleteMovie(db *sqlx.DB, id int) error {
+	query := `
+		DELETE FROM movies
+		WHERE id = $1`
+
+	_, err := db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("Crash while deleting the movie with id %d!\nerr.Error(): %v", id, err.Error());
+	}
+
+	return nil
+}
+
+func DeleteEpisode(db *sqlx.DB, id int) error {
+	query := `
+		DELETE FROM episodes
+		WHERE id = $1`
+
+	_, err := db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("Crash while deleting the episode with id %d!\nerr.Error(): %v", id, err.Error());
+	}
+
+	return nil
+}
+
 func convertPosterListToMap(series []SeriesPoster) (map[int]SeriesPoster) {
     if len(series) == 0 {
         return nil
